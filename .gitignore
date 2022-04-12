@@ -102,3 +102,10 @@ dist
 
 # TernJS port file
 .tern-port
+
+
+# ROCKEY-ARM Dongle dynamic lib
+lib/
+
+#vscode config
+.vscode
