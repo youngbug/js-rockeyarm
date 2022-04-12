@@ -1,6 +1,22 @@
 import  RockeyArm  from  '../src/index.js'
 
 var dongle = new RockeyArm()
-
-var ret = 0
+var ret
+var i = 0
+var item
+var index = null
+var pid = 'FFFFFFFF'
 ret = dongle.Enum()
+for (i=0; i<ret.param.length; i++){
+  item = JSON.parse(ret.param[i])
+  if(item.productId === pid){
+    index = i
+    break;
+  }
+}
+if (index === null){
+  console.log('Do not find ROCKEY-ARM Product ID:%s', pid)
+}
+
+
+ 
