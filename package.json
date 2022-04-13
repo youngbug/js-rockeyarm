@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/youngbug/js-rockeyarm#readme",
   "devDependencies": {
-    "eslint": "^8.2.0"
+    "eslint": "^8.13.0"
   },
   "dependencies": {
     "ffi-napi": "^4.0.3",
