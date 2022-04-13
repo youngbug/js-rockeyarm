@@ -22,6 +22,7 @@ function genDongleInfoItem(versionL, versionR, type, userId, hardwareIdL, hardwa
     }
 }
 
+
 function stringToByte(str) {
     var bytes = new Array()
     var len, c
@@ -60,8 +61,13 @@ function structToByteArray(struct){
 function getByteFromByteArray(buffer){
     var i = 0
     var str = ''
+    var s = ''
     for(i=0; i<buffer.length; i++){
-        str = str + buffer[i].toString(16).toUpperCase()
+        s = buffer[i].toString(16).toUpperCase()
+        if (s.length === 1) { //转成16进制后补零
+            s = '0' + s
+        }
+        str = str + s
     }
     return str
 }
@@ -165,16 +171,28 @@ var RockeyArm = /** @class */ (function(){  //-class start
         return genResult(ret, 'success','Generate random', {random: getByteFromByteArray(buffer)})
     }
 
-    RockeyArm.prototype.LEDControl=function(){
-        return 1
+    RockeyArm.prototype.LEDControl = function(flag){
+        ret = this.libRockey.Dongle_LEDControl(this.handle, flag)
+        if(ret !== 0) {
+            return genResult(ret, 'failed', 'Control LED', null)
+        }
+        return genResult(ret, 'success', 'Control LED', null)
     }
 
     RockeyArm.prototype.SwitchProtocol = function(flag){
-        return flag
+        ret = this.libRockey.Dongle_SwitchProtocol(this.handle, flag)
+        if(ret !== 0) {
+            return genResult(ret, 'failed', 'Switch device transmit protocol', null)
+        }
+        return genResult(ret, 'success', 'Switch device transmit protocol', null)
     }
 
     RockeyArm.prototype.RFS = function(){
-        return 1
+        ret = this.libRockey.Dongle_RFS(this.handle)
+        if(ret !== 0) {
+            return genResult(ret, 'failed', 'Restore factory setting', null)
+        }
+        return genResult(ret, 'success', 'Restore factory setting', null)
     }
 
     RockeyArm.prototype.CreateFile = function(fileType, fileId, fileAttr){
@@ -187,6 +205,44 @@ var RockeyArm = /** @class */ (function(){  //-class start
         return genResult(ret, 'success','Create file', null)
     }
 
+    RockeyArm.prototype.WriteFile = function (fileType, fileId, offset, inData, dataLen){
+        var buffer = getByteArrayFromString(inData)
+        ret = this.libRockey.Dongle_WriteFile(this.handle, fileType, fileId, offset, buffer, dataLen)
+        if(ret !== 0) {
+            return genResult(ret, 'failed','Write file.', null)
+        }
+        return genResult(ret, 'success','Write file', null)       
+    }
+
+    RockeyArm.prototype.ReadFile = function (fileId, offset, dataLen){
+        var buffer = new ptrByte(dataLen)
+        ret = this.libRockey.Dongle_ReadFile(this.handle, fileId,  offset, buffer, dataLen)
+        if(ret !== 0) {
+            return genResult(ret, 'failed','Read file.', null)
+        }
+        return genResult(ret, 'success','Read file', null)       
+    }
+
+    RockeyArm.prototype.DownloadExeFile = function () {
+        
+    }
+
+    RockeyArm.prototype.RunExeFile = function (fileId, inBuffer, inLen) {
+
+    }
+
+    RockeyArm.prototype.DeleteFile = function (fileType, fileId) {
+
+    }
+
+    RockeyArm.prototype.ListFile = function (fileType) {
+
+    }
+
+    RockeyArm.prototype.GenUniqueKey = function (seedLen, seed) {
+
+    }
+
     RockeyArm.prototype.VerifyPIN = function(flag, Pin){
         var arrayPin = getByteArrayFromString(Pin)
         var remainCount = new ptrInt(1)
@@ -195,6 +251,134 @@ var RockeyArm = /** @class */ (function(){  //-class start
             return  genResult(ret, 'failed','Verify PIN.', {retryTimes: remainCount[0]})
         }
         return  genResult(ret, 'success','Verify PIN.', {retryTimes: remainCount[0]})
+    }
+
+    RockeyArm.prototype.ChangePIN = function(flag, oldPin, newPin, tyrCount){
+
+    }
+
+    RockeyArm.prototype.ResetUserPIN = function(adminPin) {
+
+    }
+
+    RockeyArm.prototype.SetUserID = function(userId) {
+
+    }
+
+    RockeyArm.prototype.GetDeadline = function() {
+
+    }
+
+    RockeyArm.prototype.SetDeadline = function(time) {
+
+    }
+
+    RockeyArm.prototype.GetUTCTime = function() {
+
+    }
+
+    RockeyArm.prototype.ReadData = function(offset, dataLen) {
+
+    }
+
+    RockeyArm.prototype.WriteData = function(offset, data, dataLen) {
+
+    }
+
+    RockeyArm.prototype.ReadShareMemory = function() {
+
+    }
+
+    RockeyArm.prototype.WriteShareMemory = function(data, dataLen) {
+
+    }
+
+    RockeyArm.prototype.RsaGenPubPriKey = function(priFileId) {
+
+    }
+
+    RockeyArm.prototype.RsaPri = function(priFileId, inData, inDataLen, outDataLen) {
+
+    }
+
+    RockeyArm.prototype.RsaPub = function(flag, pubKey, inData, inDataLen, outDataLen) {
+
+    }
+
+    RockeyArm.prototype.EccGenPubPriKey = function(priFileId) {
+
+    }
+
+    RockeyArm.prototype.EccSign = function(priFileId, hashData, hashDataLen) {
+
+    }
+
+    RockeyArm.prototype.EccVerify = function(pubKey, hashData, hashDataLen, sign) {
+
+    }
+
+    RockeyArm.prototype.SM2GenPubPriKey = function(priFileId) {
+
+    }
+
+    RockeyArm.prototype.SM2Sign = function(priFileId, hashData, hashDataLen) {
+
+    }
+
+    RockeyArm.prototype.SM2Verify = function(pubKey, hashData, hashDataLen, sign) {
+
+    }
+
+    RockeyArm.prototype.TDES = function(keyFileId, flag, inData, dataLen) {
+
+    }
+
+    RockeyArm.prototype.SM4 = function(keyFileId, flag, inData, dataLen) {
+
+    }
+
+    RockeyArm.prototype.HASH = function(flag, inData, dataLen) {
+
+    }
+
+    RockeyArm.prototype.Seed = function(seed, seedLen) {
+
+    }
+
+    RockeyArm.prototype.LimitSeedCount = function(count) {
+
+    }
+
+    RockeyArm.prototype.GenMotherKey = function(motherData) {
+
+    }
+
+    RockeyArm.prototype.RequestInit = function() {
+
+    }
+
+    RockeyArm.prototype.GetInitDataFromMother = function(request, dataLen) {
+
+    }
+
+    RockeyArm.prototype.InitSon = function(initData, dataLen) {
+
+    }
+
+    RockeyArm.prototype.SetUpdatePriKey = function(priKey) {
+
+    }
+
+    RockeyArm.prototype.MakeUpdatePacket = function(inData) {
+
+    }
+
+    RockeyArm.prototype.MakeUpdatePacketFromMother = function(inData) {
+
+    }
+
+    RockeyArm.prototype.Update = function(updateData, dataLen) {
+
     }
 
     return RockeyArm
