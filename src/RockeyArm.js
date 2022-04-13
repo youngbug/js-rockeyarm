@@ -1,5 +1,5 @@
 import { Library as ffi_Library } from 'ffi-napi'
-import {rockeyInterface, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ptrVoid, dataFileAttr} from './functions.js'
+import {rockeyInterface, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ptrDataFileList, dataFileAttr} from './functions.js'
 
 //
 function genResult(retcode, info, msg, returnParam){
@@ -72,11 +72,18 @@ function getByteFromByteArray(buffer){
     return str
 }
 
-function getByteArrayFromString(str){
+function getByteArrayFromString(str, flag){
     var i = 0
+    var len
     var byte = stringToByte(str)
-    var byteArray = new ptrByte(byte.length)
-    for(i = 0;  i < byte.length; i++){
+    if (flag === undefined) {
+        len = byte.length
+    } else {
+        len = byte.length + 1
+    }
+    var byteArray = new ptrByte(len)
+    byteArray[len-1] = 0
+    for(i = 0;  i < len; i++){
         byteArray[i] = byte[i]
     }
     return byteArray
@@ -244,11 +251,32 @@ var RockeyArm = /** @class */ (function(){  //-class start
     }
 
     RockeyArm.prototype.DeleteFile = function (fileType, fileId) {
-
+        var ret = this.libRockey.Dongle_DeleteFile(this.handle, fileType, fileId)
+        if(ret !== 0) {
+            return genResult(ret, 'failed','Delete file.', null)
+        }
+        return genResult(ret, 'success','Delete file', null) 
     }
 
-    RockeyArm.prototype.ListFile = function (fileType) {
-
+    RockeyArm.prototype.ListFile = function (fileType, len) {
+        var dataFileListSize = 12
+        var dataLen = new ptrInt(1)
+        dataLen[0] = 1//小于等于0回报参数错误
+        if (len === undefined) {
+            ret = this.libRockey.Dongle_ListFile(this.handle, fileType, null, dataLen)
+            if(ret !== 0) {
+                return genResult(ret, 'failed','Enum file.', null)
+            }
+            return genResult(ret, 'success','Enum file', {dataLen: dataLen[0]}) 
+        }
+        dataLen[0] = len
+        //var dataList = new ptrDataFileList(1)
+        var dataList = new ptrByte(len)
+        if(fileType === 1) {
+            
+            ret = this.libRockey.Dongle_ListFile(this.handle, fileType, dataList, dataLen)
+            
+        }
     }
 
     RockeyArm.prototype.GenUniqueKey = function (seedLen, seed) {
@@ -256,7 +284,7 @@ var RockeyArm = /** @class */ (function(){  //-class start
     }
 
     RockeyArm.prototype.VerifyPIN = function(flag, Pin){
-        var arrayPin = getByteArrayFromString(Pin)
+        var arrayPin = getByteArrayFromString(Pin, 'endmark')
         var remainCount = new ptrInt(1)
         ret = this.libRockey.Dongle_VerifyPIN(this.handle, flag, arrayPin, remainCount)
         if (ret !== 0) {

@@ -26,12 +26,21 @@ var dataFileAttr = StructType({
     m_Write_Priv : ref.types.ushort
 })
 
+var dataFileList = StructType({
+    m_FileId :     ref.types.ushort,
+    m_Reserve :    ref.types.ushort,
+    m_Size   :     ref.types.uint32,
+    m_Read_Priv  : ref.types.ushort,
+    m_Write_Priv : ref.types.ushort
+})
+
 var ptrInt = refArray(ref.types.int)
 var ryHandle = refArray(ref.types.uint)//ROCKEY的句柄是void*，但是ref-array-napi不能创建void类型的数组
 var ptrHandle = refArray(ryHandle) //如果是32位系统，句柄用uint应该也是ok的。
 var ptrDongleInfo = refArray(dongleInfo)
 var ptrByte = refArray(ref.types.uchar)
 var ptrVoid = refArray(ref.types.uint)
+var ptrDataFileList = refArray(dataFileList)
 
 const rockeyInterface = {
     'Dongle_Enum' :             ['int', [ptrDongleInfo, ptrInt]],
@@ -85,4 +94,4 @@ const rockeyInterface = {
     'Dongle_Update' :           ['int', [ryHandle, ptrByte, 'int']]
 }
 
-export {rockeyInterface, dongleInfo, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ryHandle, ptrVoid, dataFileAttr}
+export {rockeyInterface, dongleInfo, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ryHandle, ptrVoid, dataFileAttr, dataFileList, ptrDataFileList}
