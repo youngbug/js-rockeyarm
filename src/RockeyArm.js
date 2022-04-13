@@ -227,8 +227,20 @@ var RockeyArm = /** @class */ (function(){  //-class start
         
     }
 
-    RockeyArm.prototype.RunExeFile = function (fileId, inBuffer, inLen) {
-
+    RockeyArm.prototype.RunExeFile = function (fileId, inBuffer, inOutLen) {
+        var temp = inBuffer
+        if (inOutLen * 2 > inBuffer.length ) {
+            for(var i = inBuffer.length; i < inOutLen*2; i++){
+                temp = temp + '0'
+            } 
+        }
+        var buffer = getByteArrayFromString(temp)
+        var mainRet = new ptrInt(1)
+        ret = this.libRockey.Dongle_RunExeFile(this.handle, fileId, buffer, inOutLen, mainRet)
+        if(ret !== 0) {
+            return genResult(ret, 'failed','Run execute file.', null)
+        }
+        return genResult(ret, 'success','Run execute file', {retCode: mainRet[0], outBuffer: getByteFromByteArray(buffer)}) 
     }
 
     RockeyArm.prototype.DeleteFile = function (fileType, fileId) {

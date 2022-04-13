@@ -25,6 +25,8 @@ var fileAttr = {size: 100, readPriv: 1, writePriv: 1}
 
 ret = dongle.CreateFile(1, 1, fileAttr)
 
+ret = dongle.RunExeFile(2, '0001020', 32)
+
 ret = dongle.GenRandom(8)
 
 ret = dongle.ResetState()
