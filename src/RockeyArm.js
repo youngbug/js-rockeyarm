@@ -1,6 +1,6 @@
 import { Library as ffi_Library } from 'ffi-napi'
 import {stringToByte, bytesToString} from './convert.js'
-import {rockeyInterface, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ptrDataFileList, dataFileAttr} from './functions.js'
+import {rockeyInterface, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ptrUint, dataFileAttr} from './functions.js'
 
 //
 function genResult(retcode, info, msg, returnParam){
@@ -285,24 +285,68 @@ var RockeyArm = /** @class */ (function(){  //-class start
         return  genResult(ret, 'success','Verify PIN.', {retryTimes: remainCount[0]})
     }
 
-    RockeyArm.prototype.ChangePIN = function(flag, oldPin, newPin, tyrCount){
-
+    RockeyArm.prototype.ChangePIN = function(flag, oldPin, newPin, tryCount){
+        var byteOldPin = getByteArrayFromString(oldPin, 'endmark')
+        var byteNewPin = getByteArrayFromString(newPin, 'endmark')
+        ret = this.libRockey.Dongle_ChangePIN(this.handle, byteOldPin, byteNewPin, tryCount)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Change PIN.', null)
+        }
+        return  genResult(ret, 'success','Change PIN.', null)
     }
 
     RockeyArm.prototype.ResetUserPIN = function(adminPin) {
-
+        var byteAdminPin = getByteArrayFromString(adminPin, 'endmark')
+        ret = this.libRockey.Dongle_ResetUserPIN(this.handle, byteAdminPin)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Reset user PIN.', null)
+        }
+        return  genResult(ret, 'success','Reset user PIN.', null)
     }
 
     RockeyArm.prototype.SetUserID = function(userId) {
-
+        ret = this.libRockey.Dongle_SetUserID(userId)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Set user ID.', null)
+        }
+        return  genResult(ret, 'success','Set user ID.', null)
     }
 
     RockeyArm.prototype.GetDeadline = function() {
-
+        var intTime = new ptrUint(1)
+        ret = this.libRockey.Dongle_GetDeadline(this.handle, intTime)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Get deadline.', null)
+        }
+        var strType = ''
+        var strTime = ''
+        if (intTime[0] === 0xFFFFFFFF) {
+            strType = '不限制'
+        } else if ((intTime[0] & 0xFFFF0000) === 0 ) {
+            strType = '可用小时数'
+            strTime = intTime[0].toString(10)
+        } else {
+            strType = '到期日期'
+            var date = new Date(intTime[0] * 1000) 
+            strTime = date.toUTCString()
+        }
+        return  genResult(ret, 'success','Get deadline.', {type: strType, deadline: strTime, rawTimestamp: intTime[0]})
     }
 
-    RockeyArm.prototype.SetDeadline = function(time) {
-
+    RockeyArm.prototype.SetDeadline = function(deadline) {
+        var intTime
+        if (deadline.type === 'hours') {
+            intTime = deadline.time
+        } else if (deadline.type === 'timestamp'){
+            intTime = deadline.time / 1000
+        } else if (deadline.type === 'nolimit') {
+            intTime = 0
+        }
+        ret = this.libRockey.Dongle_SetDeadline(this.handle, intTime)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Get deadline.', null)
+        }
+        return  genResult(ret, 'success','Get deadline.', null)
     }
 
     RockeyArm.prototype.GetUTCTime = function() {

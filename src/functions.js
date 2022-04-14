@@ -39,7 +39,7 @@ var ryHandle = refArray(ref.types.uint)//ROCKEY的句柄是void*，但是ref-arr
 var ptrHandle = refArray(ryHandle) //如果是32位系统，句柄用uint应该也是ok的。
 var ptrDongleInfo = refArray(dongleInfo)
 var ptrByte = refArray(ref.types.uchar)
-var ptrVoid = refArray(ref.types.uint)
+var ptrUint = refArray(ref.types.uint)
 var ptrDataFileList = refArray(dataFileList)
 
 const rockeyInterface = {
@@ -63,7 +63,7 @@ const rockeyInterface = {
     'Dongle_ChangePIN' :        ['int', [ryHandle, 'int', ptrByte, ptrByte, 'int']],
     'Dongle_ResetUserPIN' :     ['int', [ryHandle, ptrByte]],
     'Dongle_SetUserID' :        ['int', [ryHandle, 'uint32']],
-    'Dongle_GetDeadline' :      ['int', [ryHandle, ptrInt]],
+    'Dongle_GetDeadline' :      ['int', [ryHandle, ptrUint]],
     'Dongle_SetDeadline' :      ['int', [ryHandle, 'uint32']],
     'Dongle_GetUTCTime' :       ['int', [ryHandle, ptrInt]],
     'Dongle_ReadData' :         ['int', [ryHandle, 'int', ptrByte, 'int']],
@@ -94,4 +94,4 @@ const rockeyInterface = {
     'Dongle_Update' :           ['int', [ryHandle, ptrByte, 'int']]
 }
 
-export {rockeyInterface, dongleInfo, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ryHandle, ptrVoid, dataFileAttr, dataFileList, ptrDataFileList}
+export {rockeyInterface, dongleInfo, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ryHandle, ptrUint, dataFileAttr, dataFileList, ptrDataFileList}
