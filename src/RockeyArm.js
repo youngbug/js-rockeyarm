@@ -350,11 +350,23 @@ var RockeyArm = /** @class */ (function(){  //-class start
     }
 
     RockeyArm.prototype.GetUTCTime = function() {
-
+        var intTime = new ptrUint(1)
+        ret = this.libRockey.Dongle_GetUTCTime(this.handle, intTime)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Get UTC time in dongle.', null)
+        }
+        var date = new Date(intTime[0] * 1000) 
+        var strTime = date.toUTCString()
+        return  genResult(ret, 'success','Get UTC time in dongle.', {utctime: strTime})
     }
 
     RockeyArm.prototype.ReadData = function(offset, dataLen) {
-
+        var buffer = new ptrByte(dataLen)
+        ret = this.libRockey.Dongle_ReadData(this.handle, offset, buffer, dataLen)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Read data zone.', null)
+        }
+        return  genResult(ret, 'success','Read data zone.', {data : getByteFromByteArray(buffer)})
     }
 
     RockeyArm.prototype.WriteData = function(offset, data, dataLen) {

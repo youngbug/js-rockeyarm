@@ -33,6 +33,8 @@ console.log('Open ret:',ret)
 ret = dongle.VerifyPIN(1, '6ABD0831AA9DB0C3')
 console.log('VerifyPIN ret:',ret)
 
+ret = dongle.GetUTCTime()
+console.log(ret)
 //var deadline = {type: 'hours', time: 3} //设置可用时间3小时
 //var deadline = {type: 'nolimit', time: 0} //不限制使用时间
 var deadline = {type: 'timestamp', time: new Date(2024,0,1,0,0,0,0).getTime().toString(10)} //设置2024年1月1日0时0分0秒到期
@@ -46,7 +48,6 @@ console.log(ret)
 console.log('GenUniqueKey ret:',ret)
 
 var fileAttr = {size: 100, readPriv: 1, writePriv: 1}
-
 ret = dongle.CreateFile(1, 1, fileAttr)
 console.log('CreateFile ret:',ret)
 

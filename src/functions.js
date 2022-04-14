@@ -65,7 +65,7 @@ const rockeyInterface = {
     'Dongle_SetUserID' :        ['int', [ryHandle, 'uint32']],
     'Dongle_GetDeadline' :      ['int', [ryHandle, ptrUint]],
     'Dongle_SetDeadline' :      ['int', [ryHandle, 'uint32']],
-    'Dongle_GetUTCTime' :       ['int', [ryHandle, ptrInt]],
+    'Dongle_GetUTCTime' :       ['int', [ryHandle, ptrUint]],
     'Dongle_ReadData' :         ['int', [ryHandle, 'int', ptrByte, 'int']],
     'Dongle_WriteData' :        ['int', [ryHandle, 'int', ptrByte, 'int']],
     'Dongle_ReadShareMemory' :  ['int', [ryHandle, ptrByte]],
