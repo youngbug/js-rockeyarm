@@ -1,4 +1,5 @@
 import { Library as ffi_Library } from 'ffi-napi'
+import {stringToByte, bytesToString} from './convert.js'
 import {rockeyInterface, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ptrDataFileList, dataFileAttr} from './functions.js'
 
 //
@@ -22,31 +23,6 @@ function genDongleInfoItem(versionL, versionR, type, userId, hardwareIdL, hardwa
     }
 }
 
-
-function stringToByte(str) {
-    var bytes = new Array()
-    var len, c
-    len = str.length
-    for (var i = 0; i < len; i++) {
-        c = str.charCodeAt(i)
-        if (c >= 0x010000 && c <= 0x10FFFF) {
-            bytes.push(((c >> 18) & 0x07) | 0xF0)
-            bytes.push(((c >> 12) & 0x3F) | 0x80)
-            bytes.push(((c >> 6) & 0x3F) | 0x80)
-            bytes.push((c & 0x3F) | 0x80)
-        } else if (c >= 0x000800 && c <= 0x00FFFF) {
-            bytes.push(((c >> 12) & 0x0F) | 0xE0)
-            bytes.push(((c >> 6) & 0x3F) | 0x80)
-            bytes.push((c & 0x3F) | 0x80)
-        } else if (c >= 0x000080 && c <= 0x0007FF) {
-            bytes.push(((c >> 6) & 0x1F) | 0xC0)
-            bytes.push((c & 0x3F) | 0x80)
-        } else {
-            bytes.push(c & 0xFF)
-        }
-    }
-    return bytes
-}
 
 function structToByteArray(struct){
     var i = 0
@@ -89,6 +65,14 @@ function getByteArrayFromString(str, flag){
     return byteArray
 }
 
+function getByteArrayFromBytes(bytes){
+    var byteArray = new ptrByte(bytes.length)
+    for(var i=0; i<bytes.length; i++){
+        byteArray[i] = bytes[i]
+    }
+    return byteArray
+}
+
 function getFileAttr(fileType, fileAttr){
     var dataAttr = new dataFileAttr(1)
     if (fileType === 1) {
@@ -107,6 +91,7 @@ var RockeyArm = /** @class */ (function(){  //-class start
         this.result = 0
         this.handle = null
         this.libFilePath = 'd:/mywork/youngbug/js-rockeyarm/lib/Dongle_d_x64.dll'
+        //this.libFilePath = '/mnt/d/mywork/youngbug/js-rockeyarm/lib/libRockeyARM.so.0.3'
         this.libRockey = new ffi_Library(this.libFilePath, rockeyInterface)
     }
 
@@ -259,7 +244,7 @@ var RockeyArm = /** @class */ (function(){  //-class start
     }
 
     RockeyArm.prototype.ListFile = function (fileType, len) {
-        var dataFileListSize = 12
+        //var dataFileListSize = 12
         var dataLen = new ptrInt(1)
         dataLen[0] = 1//小于等于0回报参数错误
         if (len === undefined) {
@@ -272,15 +257,22 @@ var RockeyArm = /** @class */ (function(){  //-class start
         dataLen[0] = len
         //var dataList = new ptrDataFileList(1)
         var dataList = new ptrByte(len)
-        if(fileType === 1) {
-            
-            ret = this.libRockey.Dongle_ListFile(this.handle, fileType, dataList, dataLen)
-            
+        ret = this.libRockey.Dongle_ListFile(this.handle, fileType, dataList, dataLen)        
+        if(ret !== 0) {
+            return genResult(ret, 'failed','Enum file.', null)
         }
+        return genResult(ret, 'success','Enum file', {dataLen: getByteFromByteArray(dataList)}) //这个地方应该解析一下返回的结构体成json
     }
 
     RockeyArm.prototype.GenUniqueKey = function (seedLen, seed) {
-
+        var byteSeed = getByteArrayFromBytes(seed)
+        var bytePid = new ptrByte(8)
+        var byteAdminPin = new ptrByte(16)
+        ret = this.libRockey.Dongle_GenUniqueKey(this.handle, seedLen, byteSeed, bytePid, byteAdminPin)
+        if(ret !== 0) {
+            return genResult(ret, 'failed','Generate unique key.', null)
+        }
+        return genResult(ret, 'success','Generate unique key', {productId: bytesToString(bytePid.buffer), adminPIN: bytesToString(byteAdminPin.buffer)})
     }
 
     RockeyArm.prototype.VerifyPIN = function(flag, Pin){
