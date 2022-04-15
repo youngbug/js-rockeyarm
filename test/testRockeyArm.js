@@ -27,6 +27,11 @@ console.log('Open ret:',ret)
 ret = dongle.VerifyPIN(1, '6ABD0831AA9DB0C3')
 console.log('VerifyPIN ret:',ret)
 
+ret = dongle.EccGenPubPriKey(0x0004)
+console.log('EccGenPubPriKey ret:', ret)
+var eccPrivateKey = ret.param.privateKey
+var eccPublicKey = ret.param.publicKey
+
 ret = dongle.RsaGenPubPriKey(0x0003)
 console.log('RsaGenPubPriKey ret:', ret)
 var privateKey = ret.param.privateKey

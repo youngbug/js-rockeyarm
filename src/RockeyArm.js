@@ -433,7 +433,13 @@ var RockeyArm = /** @class */ (function(){  //-class start
     }
 
     RockeyArm.prototype.EccGenPubPriKey = function(priFileId) {
-
+        var byteEccPubKey = new ptrByte(68)
+        var byteEccPriKey = new ptrByte(36)
+        ret = this.libRockey.Dongle_EccGenPubPriKey(this.handle, priFileId, byteEccPubKey, byteEccPriKey)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Generate ECC key pairs.', null)
+        }
+        return  genResult(ret, 'success','Generate ECC key pairs.', {publicKey: getByteFromByteArray(byteEccPubKey), privateKey: getByteFromByteArray(byteEccPriKey)})
     }
 
     RockeyArm.prototype.EccSign = function(priFileId, hashData, hashDataLen) {
