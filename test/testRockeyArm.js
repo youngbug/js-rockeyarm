@@ -1,10 +1,4 @@
 import  RockeyArm  from  '../src/index.js'
-import { bytesToHex, hexToString, bytesToString } from '../src/convert.js'
-
-var x= bytesToHex([65,50,51,52]) 
-var y = hexToString([49,50,51,52])
-var z = bytesToString([65,50,51,52])
-console.log(x,y,z)
 
 var dongle = new RockeyArm()
 var ret
@@ -32,6 +26,21 @@ console.log('Open ret:',ret)
 
 ret = dongle.VerifyPIN(1, '6ABD0831AA9DB0C3')
 console.log('VerifyPIN ret:',ret)
+
+ret = dongle.WriteShareMemory('AAAABBBB')
+console.log('WriteShareMemory ret:',ret)
+
+ret = dongle.ReadShareMemory()
+console.log('ReadShareMemory ret:', ret)
+
+ret = dongle.RsaGenPubPriKey(0x0003)
+console.log('RsaGenPubPriKey ret:', ret)
+
+ret = dongle.ReadData(1, 8)
+console.log('ReadData ret:',ret)
+
+ret = dongle.WriteData(0, '0102030405060708', 8)
+console.log('WriteData ret:',ret)
 
 ret = dongle.GetUTCTime()
 console.log(ret)

@@ -1,5 +1,5 @@
 import { Library as ffi_Library } from 'ffi-napi'
-import {stringToByte, bytesToString} from './convert.js'
+import {stringToByte, bytesToString, hexToBytes} from './convert.js'
 import {rockeyInterface, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ptrUint, dataFileAttr} from './functions.js'
 
 //
@@ -370,19 +370,40 @@ var RockeyArm = /** @class */ (function(){  //-class start
     }
 
     RockeyArm.prototype.WriteData = function(offset, data, dataLen) {
-
+        var byteBuffer = getByteArrayFromBytes(hexToBytes(data))
+        ret = this.libRockey.Dongle_WriteData(this.handle, offset, byteBuffer, dataLen)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Write data zone.', null)
+        }
+        return  genResult(ret, 'success','Write data zone.', null)
     }
 
     RockeyArm.prototype.ReadShareMemory = function() {
-
+        var buffer = new ptrByte(32)
+        ret = this.libRockey.Dongle_ReadShareMemory(this.handle, buffer)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Read share memory.', null)
+        }
+        return  genResult(ret, 'success','Read share memory.', {data : getByteFromByteArray(buffer)})
     }
 
-    RockeyArm.prototype.WriteShareMemory = function(data, dataLen) {
-
+    RockeyArm.prototype.WriteShareMemory = function(data) {
+        var byteBuffer = getByteArrayFromBytes(hexToBytes(data))
+        ret = this.libRockey.Dongle_WriteShareMemory(this.handle, byteBuffer, 32) //写入数据长度必须固定32，文档中说小于32，其实只能等于32
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Write share memory.', null)
+        }
+        return  genResult(ret, 'success','Write share memory.', null)
     }
 
     RockeyArm.prototype.RsaGenPubPriKey = function(priFileId) {
-
+        var byteRsaPubKey = new ptrByte(264)
+        var byteRsaPriKey = new ptrByte(520)
+        ret = this.libRockey.Dongle_RsaGenPubPriKey(this.handle, priFileId, byteRsaPubKey, byteRsaPriKey)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Generate RSA key pairs.', null)
+        }
+        return  genResult(ret, 'success','Generate RSA key pairs.', {publicKey: getByteFromByteArray(byteRsaPubKey), privateKey: getByteFromByteArray(byteRsaPriKey)})
     }
 
     RockeyArm.prototype.RsaPri = function(priFileId, inData, inDataLen, outDataLen) {

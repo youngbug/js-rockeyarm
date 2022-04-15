@@ -94,4 +94,9 @@ function bytesToString(bytes){
     return hexToString(hex)
 }
 
-export {byteToHexString, stringToByte, hexToBytes, stringToHex, hexStringToBytes, bytesToHex, hexToString, bytesToString}
+// '01020304' 转为 [0x30,0x31,x030,0x32,0x30,0x33,0x30,0x34]
+function stringToBytes(str){
+    return hexToBytes(stringToHex(str))
+}
+
+export {byteToHexString, stringToByte, hexToBytes, stringToHex, hexStringToBytes, bytesToHex, hexToString, bytesToString, stringToBytes}
