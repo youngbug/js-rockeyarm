@@ -421,7 +421,6 @@ var RockeyArm = /** @class */ (function(){  //-class start
     RockeyArm.prototype.RsaPub = function(flag, pubKey, inData, inDataLen) {
         var byteInData = getByteArrayFromBytes(hexToBytes(inData))
         var bytePubKey = getByteArrayFromBytes(hexToBytes(pubKey))
-        console.log('pubkey:',bytePubKey.buffer)
         var byteOutData = new ptrByte(256)
         var ptrIntOutDataLen = new ptrInt(1)
         ptrIntOutDataLen[0] = 256
@@ -443,23 +442,55 @@ var RockeyArm = /** @class */ (function(){  //-class start
     }
 
     RockeyArm.prototype.EccSign = function(priFileId, hashData, hashDataLen) {
-
+        var byteHashData = getByteArrayFromBytes(hexToBytes(hashData))
+        var byteOutData = new ptrByte(64)
+        ret = this.libRockey.Dongle_EccSign(this.handle, priFileId, byteHashData, hashDataLen, byteOutData)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','ECC sign.', null)
+        }
+        return  genResult(ret, 'success','ECC sign.', {signature: getByteFromByteArray(byteOutData)})
     }
 
     RockeyArm.prototype.EccVerify = function(pubKey, hashData, hashDataLen, sign) {
-
+        var bytePubKey = getByteArrayFromBytes(hexToBytes(pubKey))
+        var byteHashData = getByteArrayFromBytes(hexToBytes(hashData))
+        var byteSign = getByteArrayFromBytes(hexToBytes(sign))
+        ret = this.libRockey.Dongle_EccVerify(this.handle, bytePubKey, byteHashData, hashDataLen, byteSign)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Verify ECC signature.', null)
+        }
+        return  genResult(ret, 'success','Verify ECC signature.', null)
     }
 
     RockeyArm.prototype.SM2GenPubPriKey = function(priFileId) {
-
+        var byteEccPubKey = new ptrByte(68)
+        var byteEccPriKey = new ptrByte(36)
+        ret = this.libRockey.Dongle_SM2GenPubPriKey(this.handle, priFileId, byteEccPubKey, byteEccPriKey)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Generate Chinese Guomi SM2 key pairs.', null)
+        }
+        return  genResult(ret, 'success','Generate Chinese Guomi SM2 key pairs.', {publicKey: getByteFromByteArray(byteEccPubKey), privateKey: getByteFromByteArray(byteEccPriKey)})
     }
 
     RockeyArm.prototype.SM2Sign = function(priFileId, hashData, hashDataLen) {
-
+        var byteHashData = getByteArrayFromBytes(hexToBytes(hashData))
+        var byteOutData = new ptrByte(64)
+        ret = this.libRockey.Dongle_SM2Sign(this.handle, priFileId, byteHashData, hashDataLen, byteOutData)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','SM2 sign.', null)
+        }
+        return  genResult(ret, 'success','SM2 sign.', {signature: getByteFromByteArray(byteOutData)})
     }
 
     RockeyArm.prototype.SM2Verify = function(pubKey, hashData, hashDataLen, sign) {
-
+        var bytePubKey = getByteArrayFromBytes(hexToBytes(pubKey))
+        var byteHashData = getByteArrayFromBytes(hexToBytes(hashData))
+        var byteSign = getByteArrayFromBytes(hexToBytes(sign))
+        ret = this.libRockey.Dongle_SM2Verify(this.handle, bytePubKey, byteHashData, hashDataLen, byteSign)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Verify SM2 signature.', null)
+        }
+        return  genResult(ret, 'success','Verify SM2 signature.', null)
     }
 
     RockeyArm.prototype.TDES = function(keyFileId, flag, inData, dataLen) {
