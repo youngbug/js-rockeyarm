@@ -1,3 +1,5 @@
+import { platform, arch, cwd} from 'process'
+import { dirname } from 'path'
 import { Library as ffi_Library } from 'ffi-napi'
 import {stringToByte, bytesToString, hexToBytes} from './convert.js'
 import {rockeyInterface, ptrDongleInfo, ptrInt, ptrByte, ptrHandle, ptrUint, dataFileAttr} from './functions.js'
@@ -8,9 +10,9 @@ function genResult(retcode, info, msg, returnParam){
 }
 
 function genDongleInfoItem(versionL, versionR, type, userId, hardwareIdL, hardwareIdR, productId, isMother, devType){
-    var typeList = {0 : '标准时钟锁', 2 : '标准U盘锁', 255 : '标准版'} 
-    var motherTypeList = {0 : '空锁', 1 : '母锁', 2 : '子锁'}
-    var devTypeList = {0 : '人体学输入设备', 1 : '智能卡设备'}
+    var typeList = {0 : 'ROCKEY-ARM TIME', 2 : 'StoreROCKEY-ARM', 255 : 'ROCKEY-ARM'} 
+    var motherTypeList = {0 : 'New Dongle', 1 : 'Master Dongle', 2 : 'User Dongle'}
+    var devTypeList = {0 : 'HID Device', 1 : 'Smart Card Device'}
     return {
         version: versionR.toString()+'.'+versionL.toString(),
         type: typeList[type],
@@ -90,8 +92,11 @@ var RockeyArm = /** @class */ (function(){  //-class start
         this.handle = 0
         this.result = 0
         this.handle = null
-        this.libFilePath = 'd:/mywork/youngbug/js-rockeyarm/lib/Dongle_d_x64.dll'
-        //this.libFilePath = '/mnt/d/mywork/youngbug/js-rockeyarm/lib/libRockeyARM.so.0.3'
+        if (platform === 'win32' && arch === 'x64'){
+            this.libFilePath = cwd() + '\\lib\\x64\\Dongle_d_x64.dll'
+        } else if (platform === 'linux' && arch === 'x64') {
+            this.libFilePath = cwd() + '/lib/x64/libRockeyARM.so.0.3'
+        }
         this.libRockey = new ffi_Library(this.libFilePath, rockeyInterface)
     }
 
@@ -321,12 +326,12 @@ var RockeyArm = /** @class */ (function(){  //-class start
         var strType = ''
         var strTime = ''
         if (intTime[0] === 0xFFFFFFFF) {
-            strType = '不限制'
+            strType = 'NoLimit'
         } else if ((intTime[0] & 0xFFFF0000) === 0 ) {
-            strType = '可用小时数'
+            strType = 'RemainHour'
             strTime = intTime[0].toString(10)
         } else {
-            strType = '到期日期'
+            strType = 'ExpirationDate'
             var date = new Date(intTime[0] * 1000) 
             strTime = date.toUTCString()
         }
