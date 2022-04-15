@@ -406,12 +406,30 @@ var RockeyArm = /** @class */ (function(){  //-class start
         return  genResult(ret, 'success','Generate RSA key pairs.', {publicKey: getByteFromByteArray(byteRsaPubKey), privateKey: getByteFromByteArray(byteRsaPriKey)})
     }
 
-    RockeyArm.prototype.RsaPri = function(priFileId, inData, inDataLen, outDataLen) {
-
+    RockeyArm.prototype.RsaPri = function(priFileId, flag, inData, inDataLen) {
+        var byteInData = getByteArrayFromBytes(hexToBytes(inData))
+        var byteOutData = new ptrByte(256)
+        var ptrIntOutDataLen = new ptrInt(1)
+        ptrIntOutDataLen[0] = 256
+        ret = this.libRockey.Dongle_RsaPri(this.handle, priFileId, flag, byteInData, inDataLen, byteOutData, ptrIntOutDataLen)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Calculate RSA private key.', null)
+        }
+        return  genResult(ret, 'success','Calculate RSA private key.', {result: getByteFromByteArray(byteOutData), len: ptrIntOutDataLen[0]})
     }
 
-    RockeyArm.prototype.RsaPub = function(flag, pubKey, inData, inDataLen, outDataLen) {
-
+    RockeyArm.prototype.RsaPub = function(flag, pubKey, inData, inDataLen) {
+        var byteInData = getByteArrayFromBytes(hexToBytes(inData))
+        var bytePubKey = getByteArrayFromBytes(hexToBytes(pubKey))
+        console.log('pubkey:',bytePubKey.buffer)
+        var byteOutData = new ptrByte(256)
+        var ptrIntOutDataLen = new ptrInt(1)
+        ptrIntOutDataLen[0] = 256
+        ret = this.libRockey.Dongle_RsaPub(this.handle, flag, bytePubKey, byteInData, inDataLen, byteOutData, ptrIntOutDataLen)
+        if (ret !== 0) {
+            return  genResult(ret, 'failed','Calculate RSA public key.', null)
+        }
+        return  genResult(ret, 'success','Calculate RSA public key.', {result: getByteFromByteArray(byteOutData), len: ptrIntOutDataLen[0]})
     }
 
     RockeyArm.prototype.EccGenPubPriKey = function(priFileId) {
