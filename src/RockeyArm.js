@@ -494,23 +494,59 @@ var RockeyArm = /** @class */ (function(){  //-class start
     }
 
     RockeyArm.prototype.TDES = function(keyFileId, flag, inData, dataLen) {
-
+        var byteInData = getByteArrayFromBytes(hexToBytes(inData))
+        var byteOutData = new ptrByte(dataLen)
+        ret = this.libRockey.Dongle_TDES(this.handle, keyFileId, flag, byteInData, byteOutData, dataLen)
+        if (ret != 0) {
+            return genResult(ret, 'failed', 'Calculate Triple DES.', null)
+        }
+        return genResult(ret, 'success', 'Calculate Triple DES.', {result: getByteFromByteArray(byteOutData)})
     }
 
     RockeyArm.prototype.SM4 = function(keyFileId, flag, inData, dataLen) {
-
+        var byteInData = getByteArrayFromBytes(hexToBytes(inData))
+        var byteOutData = new ptrByte(dataLen)
+        ret = this.libRockey.Dongle_SM4(this.handle, keyFileId, flag, byteInData, byteOutData, dataLen)
+        if (ret != 0) {
+            return genResult(ret, 'failed', 'Calculate SM4.', null)
+        }
+        return genResult(ret, 'success', 'Calculate SM4.', {result: getByteFromByteArray(byteOutData)})
     }
 
     RockeyArm.prototype.HASH = function(flag, inData, dataLen) {
-
+        var byteInData = getByteArrayFromBytes(hexToBytes(inData))
+        var len = 0
+        if(flag === 0) {
+            len = 16
+        } else if (flag === 1) {
+            len = 20
+        } else {
+            len = 32
+        }
+        var byteHashData = new ptrByte(len)
+        ret = this.libRockey.Dongle_HASH(this.handle, flag, byteInData, dataLen, byteHashData)
+        if (ret != 0) {
+            return genResult(ret, 'failed', 'Calculate hash.', null)
+        }
+        return genResult(ret, 'success', 'Calculate hash.', {result: getByteFromByteArray(byteHashData)})
     }
 
     RockeyArm.prototype.Seed = function(seed, seedLen) {
-
+        var byteSeed = getByteArrayFromBytes(hexToBytes(seed))
+        var byteOutData = new ptrByte(16)
+        ret = this.libRockey.Dongle_Seed(this.handle, byteSeed, seedLen, byteOutData)
+        if (ret != 0) {
+            return genResult(ret, 'failed', 'Calculate seed.', null)
+        }
+        return genResult(ret, 'success', 'Calculate seed.', {result: getByteFromByteArray(byteOutData)})
     }
 
     RockeyArm.prototype.LimitSeedCount = function(count) {
-
+        ret = this.libRockey.Dongle_LimitSeedCount(this.handle, count)
+        if (ret != 0) {
+            return genResult(ret, 'failed', 'Set seed limit count', null)
+        }
+        return genResult(ret, 'success', 'Set seed limit count', null)
     }
 
     RockeyArm.prototype.GenMotherKey = function(motherData) {
