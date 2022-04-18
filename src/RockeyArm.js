@@ -93,7 +93,7 @@ var RockeyArm = /** @class */ (function(){  //-class start
         this.result = 0
         this.handle = null
         if (platform === 'win32' && arch === 'x64'){
-            this.libFilePath = cwd() + '\\lib\\x64\\Dongle_d_x64.dll'
+            this.libFilePath = cwd() + '\\lib\\x64\\Dongle_d.dll'
         } else if (platform === 'linux' && arch === 'x64') {
             this.libFilePath = cwd() + '/lib/x64/libRockeyARM.so.0.3'
         }
