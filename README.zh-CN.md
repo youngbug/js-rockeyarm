@@ -18,7 +18,7 @@ js-rockeyarm经过测试：
 
 ## 准备工作
 
-你需要有Node.js的开发环境。
+你需要安装Node.js的开发环境。
 
 你还需要从[飞天诚信](https://www.ftsafe.com.cn/)购买获得[ROCKEY-ARM](http://www.ftsafe.com.cn/products/rockey/ROCKEY-ARM)硬件和对应的SDK包。
 
